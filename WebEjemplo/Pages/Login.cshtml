@@ -1,0 +1,55 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 180px);">
+    <div class="col-md-6 col-lg-4">
+        <div class="flota-card shadow-lg p-4 animate-fade-in" style="border-radius: 20px;">
+            <div class="text-center mb-4">
+                <img src="~/img/flota-dld.png" alt="Logo Flota DLD" class="logo-flota mb-3 shadow-sm" style="max-width: 140px; border-radius: 50%; width: 100px; height: 100px; object-fit: cover;" />
+                <h1 class="h3 flota-title fw-bold">Flota DLD</h1>
+                <p class="text-muted small">Por favor, inicia sesión para continuar</p>
+            </div>
+            
+            @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+            {
+                <div class="alert alert-danger border-0 shadow-sm text-center py-2 mb-3 small" style="border-radius: 10px;">
+                    @Model.Mensaje
+                </div>
+            }
+            
+            <form method="post">
+                <div class="form-floating mb-3">
+                    <input asp-for="UsuarioLogin" class="form-control border-0 bg-light" placeholder="usuario" autocomplete="username" style="border-radius: 12px; box-shadow: none;" />
+                    <label asp-for="UsuarioLogin" class="text-muted">Nombre de usuario</label>
+                    <span asp-validation-for="UsuarioLogin" class="text-danger small ps-2"></span>
+                </div>
+                
+                <div class="form-floating mb-4">
+                    <input asp-for="Password" type="password" class="form-control border-0 bg-light" placeholder="contraseña" autocomplete="current-password" style="border-radius: 12px; box-shadow: none;" />
+                    <label asp-for="Password" class="text-muted">Contraseña</label>
+                    <span asp-validation-for="Password" class="text-danger small ps-2"></span>
+                </div>
+                
+                <div class="d-grid gap-2 mb-3">
+                    <button type="submit" class="btn btn-flota py-2/5 rounded-pill shadow fw-bold border-0" style="background: linear-gradient(135deg, #4682b4 0%, #2a5885 100%); padding-top: 10px; padding-bottom: 10px;">
+                        Ingresar
+                    </button>
+                    <a class="btn btn-outline-secondary py-2 rounded-pill fw-bold border-1 mt-1 small" asp-page="/Index" style="font-size: 14px;">
+                        Volver
+                    </a>
+                </div>
+                
+                <div class="text-center text-muted small mt-4 p-2 bg-light rounded-3" style="font-size: 11px;">
+                    @* Si no te sabes la clave de luchito, estás dado vuelta de carnero, usa la de demo acá abajo *@
+                    Usuario demo: <strong class="text-dark">luchito</strong> / Contraseña: <strong class="text-dark">1234</strong>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

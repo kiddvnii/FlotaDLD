@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Flota DLD</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebEjemplo.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="container-fluid px-4 pt-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <div class="accessibility-container">
+        <button class="accessibility-toggle-btn" id="accessibilityToggleBtn" title="Opciones de Accesibilidad" aria-label="Opciones de Accesibilidad">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-universal-access" viewBox="0 0 16 16">
+                <path d="M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6 5.5l-4.535-.442A.531.531 0 0 1 1.5 4.5V4h13v.5a.531.531 0 0 1-.402.512L9.5 5.5V11l1.9 2.5a.5.5 0 1 1-.8.6L8.5 11.5H7.5L5.4 14.1a.5.5 0 0 1-.8-.6l1.9-2.5zm.5 1H8v4h.5z"/>
+            </svg>
+        </button>
+        <div class="accessibility-widget" id="accessibilityWidget">
+            <div class="accessibility-header">
+                <h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="me-2 align-text-bottom" viewBox="0 0 16 16">
+                        <path d="M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6 5.5l-4.535-.442A.531.531 0 0 1 1.5 4.5V4h13v.5a.531.531 0 0 1-.402.512L9.5 5.5V11l1.9 2.5a.5.5 0 1 1-.8.6L8.5 11.5H7.5L5.4 14.1a.5.5 0 0 1-.8-.6l1.9-2.5zm.5 1H8v4h.5z"/>
+                    </svg>
+                    Accesibilidad
+                </h4>
+                <button class="accessibility-close-btn" id="accessibilityCloseBtn" title="Cerrar opciones">&times;</button>
+            </div>
+            <div class="accessibility-body">
+                <label class="accessibility-option" for="autoVoiceToggle">
+                    <span class="accessibility-label">Lector automático al pasar el mouse (Autovoz)</span>
+                    <span class="switch">
+                        <input type="checkbox" id="autoVoiceToggle">
+                        <span class="slider"></span>
+                    </span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <footer class="border-top footer text-muted">
+        <div class="container-fluid px-4">
+            &copy; Hecho por DLD
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/accessibility.js" asp-append-version="true"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

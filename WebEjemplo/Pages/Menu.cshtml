@@ -1,0 +1,84 @@
+@page
+@model MenuModel
+@{
+    ViewData["Title"] = "Menú";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="animate-fade-in">
+    <div class="flota-card shadow-sm p-4 mb-4 text-center d-flex flex-column align-items-center justify-content-center" style="border-radius: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafd 100%); border: 1px solid rgba(70,130,180,0.08);">
+        <img src="~/img/flota-dld.png" alt="Logo Flota DLD" class="logo-flota mb-3 shadow-sm" style="max-width: 120px; border-radius: 50%; width: 90px; height: 90px; object-fit: cover;" />
+        <h1 class="flota-title fw-bold h3 mb-2">Panel de Administración</h1>
+        <p class="text-muted mb-0 fs-6">
+            Bienvenido de vuelta. Selecciona una sección para gestionar la flota.
+        </p>
+    </div>
+    
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <a class="text-decoration-none text-dark d-block h-100" asp-page="/Conductores">
+                <div class="flota-card menu-card border-0 p-4 h-100 shadow-sm d-flex flex-column justify-content-between" style="border-radius: 18px; background: #eafaf1; border-left: 6px solid #2ecc71 !important; transition: all 0.3s ease;">
+                    <div>
+                        <h2 class="h5 fw-bold text-success mb-2">Conductores</h2>
+                        <p class="text-muted small mb-0">Gestión de personal de conducción, licencias y asignaciones.</p>
+                    </div>
+                    <div class="text-end mt-3 small text-success fw-bold">Entrar &rarr;</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <a class="text-decoration-none text-dark d-block h-100" asp-page="/Vehiculos">
+                <div class="flota-card menu-card border-0 p-4 h-100 shadow-sm d-flex flex-column justify-content-between" style="border-radius: 18px; background: #ebf5fb; border-left: 6px solid #3498db !important; transition: all 0.3s ease;">
+                    <div>
+                        <h2 class="h5 fw-bold text-primary mb-2">Vehículos</h2>
+                        <p class="text-muted small mb-0">Control de la flota activa, mantenimiento y documentación técnica.</p>
+                    </div>
+                    <div class="text-end mt-3 small text-primary fw-bold">Entrar &rarr;</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <a class="text-decoration-none text-dark d-block h-100" asp-page="/Viajes">
+                <div class="flota-card menu-card border-0 p-4 h-100 shadow-sm d-flex flex-column justify-content-between" style="border-radius: 18px; background: #eaf2f8; border-left: 6px solid #5dade2 !important; transition: all 0.3s ease;">
+                    <div>
+                        <h2 class="h5 fw-bold text-info mb-2" style="color: #2980b9 !important;">Viajes</h2>
+                        <p class="text-muted small mb-0">Registro, seguimiento de rutas, itinerarios y control de viajes.</p>
+                    </div>
+                    <div class="text-end mt-3 small fw-bold" style="color: #2980b9;">Entrar &rarr;</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <a class="text-decoration-none text-dark d-block h-100" asp-page="/Mapa">
+                <div class="flota-card menu-card border-0 p-4 h-100 shadow-sm d-flex flex-column justify-content-between" style="border-radius: 18px; background: #f4ecf7; border-left: 6px solid #8e44ad !important; transition: all 0.3s ease;">
+                    <div>
+                        <h2 class="h5 fw-bold mb-2" style="color: #8e44ad !important;">Mapa de Rutas</h2>
+                        <p class="text-muted small mb-0">Seguimiento en mapa interactivo de rutas por vehículos y viajes históricos.</p>
+                    </div>
+                    <div class="text-end mt-3 small fw-bold" style="color: #8e44ad;">Entrar &rarr;</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <a class="text-decoration-none text-dark d-block h-100" asp-page="/Login">
+                <div class="flota-card menu-card border-0 p-4 h-100 shadow-sm d-flex flex-column justify-content-between" style="border-radius: 18px; background: #fdf2f2; border-left: 6px solid #e74c3c !important; transition: all 0.3s ease;">
+                    <div>
+                        <h2 class="h5 fw-bold text-danger mb-2">Salir</h2>
+                        <p class="text-muted small mb-0">Cerrar la sesión de administración actual de forma segura.</p>
+                    </div>
+                    <div class="text-end mt-3 small text-danger fw-bold">Cerrar sesión &rarr;</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+@* Librería del Asistente de Chat: Estilos y script del widget interactivo de chat. *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/chat-assistant.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/chat-assistant.js" asp-append-version="true"></script>
+}

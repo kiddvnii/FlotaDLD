@@ -1,0 +1,427 @@
+@page
+@model VehiculosModel
+@{
+    ViewData["Title"] = "Vehículos";
+}
+<link rel="stylesheet" href="~/css/chat-assistant.css" asp-append-version="true" />
+<div class="flota-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1 class="flota-title flota-section-title h3 mb-1">Vehículos</h1>
+            <p class="text-muted mb-0">Formulario con CRUD, multas y mantención.</p>
+        </div>
+        <a class="btn btn-outline-flota" asp-page="/Menu">Volver al menú</a>
+    </div>
+</div>
+@if (!string.IsNullOrWhiteSpace(Model.MensajeOk))
+{
+    <div class="alert alert-success">@Model.MensajeOk</div>
+}
+@if (!Model.Conductores.Any())
+{
+    <div class="alert alert-warning">Antes de guardar vehículos, registre al menos un conductor.</div>
+}
+<form method="post" class="flota-card p-4 mb-4">
+    <input asp-for="Vehiculo.Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.TipoVehiculo" class="form-label">Tipo Vehículo</label>
+            <select asp-for="Vehiculo.TipoVehiculo" class="form-select">
+                <option value="">Seleccionar...</option>
+                <option>Auto</option>
+                <option>Camioneta</option>
+                <option>Camión</option>
+                <option>Furgón</option>
+            </select>
+            <span asp-validation-for="Vehiculo.TipoVehiculo" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Conductor" class="form-label">Conductor</label>
+            <select asp-for="Vehiculo.Conductor" class="form-select">
+                <option value="">Seleccionar...</option>
+                @foreach (var conductor in Model.Conductores)
+                {
+                    <option value="@conductor">@conductor</option>
+                }
+            </select>
+            <span asp-validation-for="Vehiculo.Conductor" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            @* Atenti con la patente: escríbela tal cual (ej. ABCD12) sin guiones ni espacios para que no ande dando jugo *@
+            <label asp-for="Vehiculo.Patente" class="form-label">Patente</label>
+            <input asp-for="Vehiculo.Patente" class="form-control" placeholder="ABCD12" />
+            <span asp-validation-for="Vehiculo.Patente" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Marca" class="form-label">Marca</label>
+            <select asp-for="Vehiculo.Marca"
+                    id="marcaSelect"
+                    class="form-select"
+                    data-valor-actual="@Model.Vehiculo.Marca">
+                <option value="">Primero seleccione un tipo...</option>
+            </select>
+            <span asp-validation-for="Vehiculo.Marca" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Modelo" class="form-label">Modelo</label>
+            <select asp-for="Vehiculo.Modelo"
+                    id="modeloSelect"
+                    class="form-select"
+                    data-valor-actual="@Model.Vehiculo.Modelo">
+                <option value="">Primero seleccione una marca...</option>
+            </select>
+            <span asp-validation-for="Vehiculo.Modelo" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Anio" class="form-label">Año</label>
+            <input asp-for="Vehiculo.Anio" type="number" class="form-control" placeholder="2024" />
+            <span asp-validation-for="Vehiculo.Anio" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Color" class="form-label">Color</label>
+            <input asp-for="Vehiculo.Color" class="form-control" placeholder="Color" />
+            <span asp-validation-for="Vehiculo.Color" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Combustible" class="form-label">Combustible</label>
+            <select asp-for="Vehiculo.Combustible" class="form-select">
+                <option value="">Seleccionar...</option>
+                <option>Bencina</option>
+                <option>Diesel</option>
+                <option>Eléctrico</option>
+                <option>Híbrido</option>
+            </select>
+            <span asp-validation-for="Vehiculo.Combustible" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4" id="kilometrajeContainer">
+            <label asp-for="Vehiculo.Kilometraje" class="form-label">Kilometraje</label>
+            <input asp-for="Vehiculo.Kilometraje" type="number" step="0.01" class="form-control" placeholder="Kilometraje" />
+            <span asp-validation-for="Vehiculo.Kilometraje" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Condición</label>
+            <select asp-for="Vehiculo.EsNuevo" id="esNuevoSelect" class="form-select">
+                <option value="false">Usado</option>
+                <option value="true">Nuevo</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Vehiculo.Estado" class="form-label">Estado</label>
+            <select asp-for="Vehiculo.Estado" class="form-select">
+                <option value="">Seleccionar...</option>
+                <option>Disponible</option>
+                <option>En viaje</option>
+                <option>En mantención</option>
+                <option>Fuera de servicio</option>
+            </select>
+            <span asp-validation-for="Vehiculo.Estado" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4 d-flex align-items-end" id="multasContainer">
+            <div class="form-check mb-2">
+                <input asp-for="Vehiculo.TieneMultas" id="checkMultas" class="form-check-input" />
+                <label asp-for="Vehiculo.TieneMultas" class="form-check-label">Tiene multas</label>
+            </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check mb-2">
+                <input asp-for="Vehiculo.VaAMantencion" id="checkMantencion" class="form-check-input" />
+                <label asp-for="Vehiculo.VaAMantencion" class="form-check-label">Va a mantención</label>
+            </div>
+        </div>
+        <div class="col-12 mt-4 pt-3 border-top">
+            <div class="p-3 bg-light rounded-4 d-flex justify-content-between align-items-center flex-wrap gap-3" style="border: 1px solid rgba(0,0,0,0.05);">
+                <div class="d-flex gap-2">
+                    <button type="submit" asp-page-handler="Guardar" class="btn px-4 py-2 rounded-pill shadow-sm border-0 fw-bold" style="background: linear-gradient(135deg, #4682b4 0%, #2a5885 100%); color: white;">
+                        @(Model.Vehiculo.Id == 0 ? "Guardar" : "Guardar cambios")
+                    </button>
+                    <a class="btn btn-outline-warning px-4 py-2 rounded-pill fw-bold" asp-page="/Vehiculos">
+                        Nuevo
+                    </a>
+                </div>
+                <a class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold" asp-page="/Menu">
+                    Volver al menú
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="flota-card p-4">
+    <h2 class="h5 mb-3">Listado</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Tipo Vehículo</th>
+                    <th>Conductor</th>
+                    <th>Patente</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Año</th>
+                    <th>Color</th>
+                    <th>Combustible</th>
+                    <th>Kilometraje</th>
+                    <th>Estado</th>
+                    <th>Tiene multas</th>
+                    <th>Va a mantención</th>
+                    <th>Código QR</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Vehiculos.Any())
+                {
+                    foreach (var item in Model.Vehiculos)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.TipoVehiculo</td>
+                            <td>@item.Conductor</td>
+                            <td>@item.Patente</td>
+                            <td>@item.Marca</td>
+                            <td>@item.Modelo</td>
+                            <td>@item.Anio</td>
+                            <td>@item.Color</td>
+                            <td>@item.Combustible</td>
+                            <td>@item.Kilometraje</td>
+                            <td>@item.Estado</td>
+                            <td>@(item.TieneMultas ? "Sí" : "No")</td>
+                            <td>@(item.VaAMantencion ? "Sí" : "No")</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info text-white btn-ver-qr" data-id="@item.Id">
+                                    🔍 Ver QR
+                                </button>
+                            </td>
+                            <td class="d-flex gap-2">
+                                <a class="btn btn-sm btn-warning text-white" asp-page="/Vehiculos" asp-route-id="@item.Id">Editar</a>
+                                <form method="post" asp-page-handler="Eliminar" asp-route-id="@item.Id" onsubmit="return confirm('¿Eliminar este vehículo?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="15" class="text-center text-muted">alo chaval no hay vehiculos en registro</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal de visualización de Código QR: Contenedor para renderizar la imagen QR generada dinámicamente -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrModalLabel">Código QR del Vehículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p id="qrPatente" class="fw-bold fs-5 mb-1"></p>
+                <div class="d-flex justify-content-center align-items-center bg-light p-3 rounded my-3 mx-auto" style="width: 220px; height: 220px; border: 1px dashed #ccc;">
+                    <img id="qrImage" src="" alt="Código QR" class="img-fluid" style="display: none; max-height: 200px;" />
+                    <div id="qrSpinner" class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+                <p class="text-muted small mb-0">Escanea este código para ver los detalles e inspección técnica en terreno.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-flota" onclick="imprimirQr()">Imprimir QR</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Acá achoclonamos toda la lógica para que las marcas y modelos cambien según el tipo de vehículo y no quede la escoba
+            const tipoSelect = document.getElementById('Vehiculo_TipoVehiculo');
+            const marcaSelect = document.getElementById('marcaSelect');
+            const modeloSelect = document.getElementById('modeloSelect');
+            const esNuevoSelect = document.getElementById('esNuevoSelect');
+            const km = document.getElementById('kilometrajeContainer');
+            const multas = document.getElementById('multasContainer');
+            const checkMultas = document.getElementById('checkMultas');
+            const checkMantencion = document.getElementById('checkMantencion');
+            const catalogoVehiculos = {
+                'Auto': {
+                    'Toyota': ['Yaris', 'Corolla', 'Camry', 'Prius'],
+                    'Hyundai': ['Accent', 'Elantra', 'Sonata', 'i10'],
+                    'Kia': ['Rio', 'Cerato', 'Morning', 'K5'],
+                    'Chevrolet': ['Sail', 'Onix', 'Cruze', 'Spark'],
+                    'Nissan': ['Versa', 'Sentra', 'Altima', 'March']
+                },
+                'Camioneta': {
+                    'Toyota': ['Hilux', 'Tacoma', 'Tundra', 'Land Cruiser 79'],
+                    'Ford': ['Ranger', 'F-150', 'Maverick', 'Ranger Raptor'],
+                    'Chevrolet': ['Silverado', 'Colorado', 'Montana', 'S10'],
+                    'Nissan': ['Navara', 'NP300', 'Frontier', 'Titan'],
+                    'Mitsubishi': ['L200', 'Triton', 'L200 Katana', 'L200 Dakar']
+                },
+                'Camión': {
+                    'Mercedes-Benz': ['Actros', 'Atego', 'Axor', 'Arocs'],
+                    'Volvo': ['FH', 'FM', 'FMX', 'FL'],
+                    'Scania': ['R Series', 'S Series', 'P Series', 'G Series'],
+                    'MAN': ['TGX', 'TGS', 'TGM', 'TGL'],
+                    'Iveco': ['S-Way', 'T-Way', 'Eurocargo', 'Trakker']
+                },
+                'Furgón': {
+                    'Mercedes-Benz': ['Sprinter', 'Vito', 'Citan', 'eSprinter'],
+                    'Ford': ['Transit', 'Transit Custom', 'E-Transit', 'Tourneo Custom'],
+                    'Peugeot': ['Boxer', 'Expert', 'Partner', 'e-Partner'],
+                    'Citroën': ['Jumper', 'Jumpy', 'Berlingo', 'ë-Berlingo'],
+                    'Renault': ['Master', 'Trafic', 'Kangoo', 'Express']
+                }
+            };
+            function cargarMarcas(marcaActual = '', modeloActual = '') {
+                const tipoElegido = tipoSelect.value;
+                marcaSelect.innerHTML = '';
+                modeloSelect.innerHTML = '';
+                if (!tipoElegido || !catalogoVehiculos[tipoElegido]) {
+                    marcaSelect.innerHTML = '<option value="">Primero seleccione un tipo...</option>';
+                    modeloSelect.innerHTML = '<option value="">Primero seleccione una marca...</option>';
+                    marcaSelect.disabled = true;
+                    modeloSelect.disabled = true;
+                    return;
+                }
+                marcaSelect.disabled = false;
+                marcaSelect.innerHTML = '<option value="">Seleccionar marca...</option>';
+                Object.keys(catalogoVehiculos[tipoElegido]).forEach(function (marca) {
+                    const opcion = document.createElement('option');
+                    opcion.value = marca;
+                    opcion.textContent = marca;
+                    marcaSelect.appendChild(opcion);
+                });
+
+                if (marcaActual && catalogoVehiculos[tipoElegido][marcaActual]) {
+                    marcaSelect.value = marcaActual;
+                    cargarModelos(modeloActual);
+                }
+                else {
+                    modeloSelect.innerHTML = '<option value="">Primero seleccione una marca...</option>';
+                    modeloSelect.disabled = true;
+                }
+            }
+            function cargarModelos(modeloActual = '') {
+                const tipoElegido = tipoSelect.value;
+                const marcaElegida = marcaSelect.value;
+                modeloSelect.innerHTML = '';
+                if (!tipoElegido ||
+                    !marcaElegida ||
+                    !catalogoVehiculos[tipoElegido]?.[marcaElegida]) {
+                    modeloSelect.innerHTML = '<option value="">Primero seleccione una marca...</option>';
+                    modeloSelect.disabled = true;
+                    return;
+                }
+                modeloSelect.disabled = false;
+                modeloSelect.innerHTML = '<option value="">Seleccionar modelo...</option>';
+                catalogoVehiculos[tipoElegido][marcaElegida].forEach(function (modelo) {
+                    const opcion = document.createElement('option');
+                    opcion.value = modelo;
+                    opcion.textContent = modelo;
+                    modeloSelect.appendChild(opcion);
+                });
+                if (modeloActual &&
+                    catalogoVehiculos[tipoElegido][marcaElegida].includes(modeloActual)) {
+                    modeloSelect.value = modeloActual;
+                }
+            }
+            // Al cambiar el tipo, cargamos sus cinco marcas
+            tipoSelect.addEventListener('change', function () {
+                cargarMarcas();
+            });
+            // Al cambiar la marca, cargamos sus cuatro modelos
+            marcaSelect.addEventListener('change', function () {
+                cargarModelos();
+            });
+            // Esto permite que al editar un vehículo aparezcan su marca y modelo guardados
+            const marcaGuardada = marcaSelect.dataset.valorActual || '';
+            const modeloGuardado = modeloSelect.dataset.valorActual || '';
+            cargarMarcas(marcaGuardada, modeloGuardado);
+            function actualizarCondicion() {
+                const nuevo = esNuevoSelect.value === 'true';
+                km.style.display = nuevo ? 'none' : '';
+                multas.style.display = nuevo ? 'none' : '';
+                checkMultas.disabled = nuevo;
+                checkMantencion.disabled = nuevo;
+                if (nuevo) {
+                    checkMultas.checked = false;
+                    checkMantencion.checked = false;
+                }
+            }
+            esNuevoSelect.addEventListener('change', actualizarCondicion);
+            actualizarCondicion();
+
+            // Consumo de servicio QR: Llama por AJAX a la API del backend (?handler=QrCode) para obtener el código QR en base64 del vehículo y mostrarlo en el modal.
+            document.querySelectorAll('.btn-ver-qr').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const id = this.getAttribute('data-id');
+                    const modalEl = document.getElementById('qrModal');
+                    const modal = new bootstrap.Modal(modalEl);
+                    
+                    const qrPatente = document.getElementById('qrPatente');
+                    const qrImage = document.getElementById('qrImage');
+                    const qrSpinner = document.getElementById('qrSpinner');
+                    
+                    qrPatente.textContent = 'Cargando...';
+                    qrImage.style.display = 'none';
+                    qrSpinner.style.display = 'block';
+                    
+                    modal.show();
+                    
+                    try {
+                        const response = await fetch(`?handler=QrCode&id=${id}`);
+                        const data = await response.json();
+                        
+                        if (data.error) {
+                            alert(data.error);
+                            modal.hide();
+                            return;
+                        }
+                        qrPatente.textContent = `Patente: ${data.patente}`;
+                        qrImage.src = `data:image/png;base64,${data.base64}`;
+                        qrSpinner.style.display = 'none';
+                        qrImage.style.display = 'block';
+                    } catch (error) {
+                        console.error('Error al generar el QR:', error);
+                        alert('No se pudo generar el código QR.');
+                        modal.hide();
+                    }
+                });
+            });
+        });
+        function imprimirQr() {
+            const img = document.getElementById('qrImage').src;
+            const patente = document.getElementById('qrPatente').innerText;
+            if (!img) return;
+            
+            const win = window.open('', '_blank');
+            win.document.write('<' + 'html><' + 'head><' + 'title>Imprimir QR - Flota DLD</' + 'title>');
+            win.document.write('<' + 'style>body { font-family: "Century Gothic", Arial, sans-serif; text-align: center; padding: 40px; }');
+            win.document.write('.container { border: 2px solid #333; border-radius: 15px; padding: 30px; display: inline-block; }');
+            win.document.write('img { width: 280px; height: 280px; margin: 20px 0; }');
+            win.document.write('h2 { color: #4682b4; margin: 0; }');
+            win.document.write('h3 { margin: 5px 0 0 0; color: #333; }');
+            win.document.write('p { font-size: 14px; color: #666; margin-top: 15px; }</' + 'style>');
+            win.document.write('</' + 'head><' + 'body>');
+            win.document.write('<div class="container">');
+            win.document.write('<h2>Flota DLD</h2>');
+            win.document.write('<h3>Identificación de Vehículo</h3>');
+            win.document.write('<' + 'img src="' + img + '" />');
+            win.document.write('<h3>' + patente + '</h3>');
+            win.document.write('<p>Escanea este código QR para verificar la información en terreno.</p>');
+            win.document.write('</div>');
+            win.document.write('<' + 'script>window.onload = function() { window.print(); window.close(); }</' + 'script>');
+            win.document.write('</' + 'body></' + 'html>');
+            win.document.close();
+        }
+    </script>
+    <script src="~/js/chat-assistant.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,164 @@
+@page
+@model ConductoresModel
+@{
+    ViewData["Title"] = "Conductores";
+}
+
+<div class="flota-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1 class="flota-title flota-section-title h3 mb-1">Conductores</h1>
+            <p class="text-muted mb-0">Formulario con CRUD: guardar, listar, editar y eliminar.</p>
+        </div>
+        <a class="btn btn-outline-flota" asp-page="/Menu">Volver al menú</a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.MensajeOk))
+{
+    <div class="alert alert-success">@Model.MensajeOk</div>
+}
+
+<form method="post" class="flota-card p-4 mb-4">
+    <input asp-for="Conductor.Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="Conductor.Nombre" class="form-label">Nombre</label>
+            <input asp-for="Conductor.Nombre" class="form-control" placeholder="Nombre" />
+            <span asp-validation-for="Conductor.Nombre" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.Apellido" class="form-label">Apellido</label>
+            <input asp-for="Conductor.Apellido" class="form-control" placeholder="Apellido" />
+            <span asp-validation-for="Conductor.Apellido" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            @* Ojo con meter bien el Rut, no se vayan a condorear con el dígito verificador *@
+            <label asp-for="Conductor.Rut" class="form-label">Rut</label>
+            <input asp-for="Conductor.Rut" class="form-control" placeholder="12.345.678-9" />
+            <span asp-validation-for="Conductor.Rut" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.Telefono" class="form-label">Teléfono</label>
+            <input asp-for="Conductor.Telefono" class="form-control" placeholder="Teléfono" />
+            <span asp-validation-for="Conductor.Telefono" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.Correo" class="form-label">Correo</label>
+            <input asp-for="Conductor.Correo" type="email" class="form-control" placeholder="correo@ejemplo.cl" />
+            <span asp-validation-for="Conductor.Correo" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.NumeroLicencia" class="form-label">N° Licencia</label>
+            <input asp-for="Conductor.NumeroLicencia" class="form-control" placeholder="N° Licencia" />
+            <span asp-validation-for="Conductor.NumeroLicencia" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.TipoLicencia" class="form-label">Tipo Licencia</label>
+            <select asp-for="Conductor.TipoLicencia" class="form-select">
+                <option value="">Seleccionar...</option>
+                <option>A1</option>
+                <option>A2</option>
+                <option>A3</option>
+                <option>A4</option>
+                <option>A5</option>
+                <option>B</option>
+                <option>C</option>
+                <option>D</option>
+            </select>
+            <span asp-validation-for="Conductor.TipoLicencia" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.Estado" class="form-label">Estado</label>
+            <select asp-for="Conductor.Estado" class="form-select">
+                <option value="">Seleccionar...</option>
+                <option>Activo</option>
+                <option>Suspendido</option>
+                <option>Inactivo</option>
+            </select>
+            <span asp-validation-for="Conductor.Estado" class="text-danger small"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Conductor.FechaVencimientoLicencia" class="form-label">Vencimiento Licencia</label>
+            <input asp-for="Conductor.FechaVencimientoLicencia" type="date" class="form-control" />
+            <span asp-validation-for="Conductor.FechaVencimientoLicencia" class="text-danger small"></span>
+        </div>
+        <div class="col-12 mt-4 pt-3 border-top">
+            <div class="p-3 bg-light rounded-4 d-flex justify-content-between align-items-center flex-wrap gap-3" style="border: 1px solid rgba(0,0,0,0.05);">
+                <div class="d-flex gap-2">
+                    <button type="submit" asp-page-handler="Guardar" class="btn px-4 py-2 rounded-pill shadow-sm border-0 fw-bold" style="background: linear-gradient(135deg, #4682b4 0%, #2a5885 100%); color: white;">
+                        @(Model.Conductor.Id == 0 ? "Guardar" : "Guardar cambios")
+                    </button>
+                    <a class="btn btn-outline-warning px-4 py-2 rounded-pill fw-bold" asp-page="/Conductores">
+                        Nuevo
+                    </a>
+                </div>
+                <a class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold" asp-page="/Menu">
+                    Volver al menú
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="flota-card p-4">
+    <h2 class="h5 mb-3">Listado</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Rut</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>N° Licencia</th>
+                    <th>Tipo Licencia</th>
+                    <th>Vencimiento Licencia</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Conductores.Any())
+                {
+                    foreach (var item in Model.Conductores)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Nombre</td>
+                            <td>@item.Apellido</td>
+                            <td>@item.Rut</td>
+                            <td>@item.Telefono</td>
+                            <td>@item.Correo</td>
+                            <td>@item.NumeroLicencia</td>
+                            <td>@item.TipoLicencia</td>
+                            <td>@item.FechaVencimientoLicencia?.ToString("yyyy-MM-dd")</td>
+                            <td>@item.Estado</td>
+                            <td class="d-flex gap-2">
+                                <a class="btn btn-sm btn-warning text-white" asp-page="/Conductores" asp-route-id="@item.Id">Editar</a>
+                                <form method="post" asp-page-handler="Eliminar" asp-route-id="@item.Id" onsubmit="return confirm('¿Eliminar este conductor?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="11" class="text-center text-muted">Sin conductores registrados.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/chat-assistant.css" asp-append-version="true" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/chat-assistant.js" asp-append-version="true"></script>
+}

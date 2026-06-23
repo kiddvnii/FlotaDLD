@@ -1,0 +1,351 @@
+@page
+@model WebEjemplo.Pages.MapaModel
+@{
+    ViewData["Title"] = "Mapa de Rutas";
+}
+
+@section Styles {
+    <!-- Importar la biblioteca de estilos de Leaflet para renderizar el mapa correctamente -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Hoja de estilos del Asistente de Chat -->
+    <link rel="stylesheet" href="~/css/chat-assistant.css" asp-append-version="true" />
+}
+
+<div class="animate-fade-in">
+    <div class="card p-4 mb-4 border-0 border-start border-5 shadow-sm" style="border-left-color: #8e44ad !important;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h1 class="fw-bold h3 mb-1 text-dark">Mapa de Rutas</h1>
+                <p class="text-muted mb-0">Visualiza de forma interactiva las rutas de la flota según sus viajes y vehículos.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-primary rounded-pill px-3" asp-page="/Viajes">Ir a Viajes</a>
+                <a class="btn btn-outline-secondary rounded-pill px-3" asp-page="/Menu">Volver al menú</a>
+            </div>
+        </div>
+    </div>
+    <div class="card p-4 mb-4 border-0 shadow-sm">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="vehiculo" class="form-label fw-semibold text-dark">Filtrar por Vehículo</label>
+                <select name="vehiculo" id="vehiculo" class="form-select rounded-pill" onchange="this.form.submit()">
+                    <option value="">-- Todos los Vehículos --</option>
+                    @foreach (var vehiculo in Model.Vehiculos)
+                    {
+                        if (Model.VehiculoSeleccionado == vehiculo)
+                        {
+                            <option value="@vehiculo" selected="selected">@vehiculo</option>
+                        }
+                        else
+                        {
+                            <option value="@vehiculo">@vehiculo</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <a href="/Mapa" class="btn btn-outline-secondary rounded-pill w-100">Limpiar Filtros</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Contenido principal: Panel lateral de viajes y el mapa -->
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card p-4 border-0 shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0 text-dark">
+                        @if (!string.IsNullOrEmpty(Model.VehiculoSeleccionado))
+                        {
+                            <span style="color: #8e44ad;">Viajes de @Model.VehiculoSeleccionado</span>
+                        }
+                        else
+                        {
+                            <span>Últimos Viajes</span>
+                        }
+                    </h2>
+                    <!-- Badge circular de Bootstrap para indicar cantidad -->
+                    <span class="badge bg-secondary rounded-pill">@Model.Viajes.Count</span>
+                </div>
+
+                <!-- Contenedor scroll de viajes estilizado puramente con clases de Bootstrap (pe-1 y estilos inline de scroll) -->
+                <div class="pe-1" style="max-height: 520px; overflow-y: auto;">
+                    @if (Model.Viajes.Any())
+                    {
+                        foreach (var item in Model.Viajes)
+                        {
+                            // Determinar la clase del badge de Bootstrap según el estado del viaje
+                            var bgBadge = item.Estado?.ToLower() switch
+                            {
+                                "pendiente" => "bg-warning text-dark",
+                                "en ruta" => "bg-primary text-white",
+                                "finalizado" => "bg-success text-white",
+                                "cancelado" => "bg-danger text-white",
+                                _ => "bg-secondary text-white"
+                            };
+
+                            <!-- Tarjeta de viaje individual usando clases de Bootstrap card -->
+                            <div class="card mb-3 p-3 border shadow-sm list-group-item-action" 
+                                 style="cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" 
+                                 id="viaje-card-@item.Id" 
+                                 onclick="seleccionarViajeDesdeTarjeta(@item.Id)">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="fw-bold text-dark fs-6">Viaje #@item.Id</span>
+                                    <span class="badge rounded-pill @bgBadge" style="font-size: 0.75rem;">@item.Estado</span>
+                                </div>
+                                <div class="mb-1 small">
+                                    <strong class="text-dark">Vehículo:</strong> <span class="text-muted">@item.Vehiculo</span>
+                                </div>
+                                <div class="mb-1 small">
+                                    <strong class="text-dark">Conductor:</strong> <span class="text-muted">@item.Conductor</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1 my-2 text-primary small">
+                                    <!-- Ícono SVG para la ubicación -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-geo-alt-fill text-danger" viewBox="0 0 16 16">
+                                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                    </svg>
+                                    <span class="text-truncate fw-semibold" style="max-width: 240px;" title="@item.Origen a @item.Destino">
+                                        @item.Origen &rarr; @item.Destino
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between text-muted pt-2 border-top" style="font-size: 0.8rem;">
+                                    <span>Distancia: @item.Distancia Km</span>
+                                    <span>@(item.FechaSalida?.ToString("dd/MM/yyyy"))</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Estado vacío con diseño Bootstrap -->
+                        <div class="text-center py-5 text-muted border rounded-3 bg-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-map mb-2 text-secondary" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.502.502 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103zM10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8v12.98zm-6-.8V.93l-4 .8v12.98l4-.8z"/>
+                            </svg>
+                            <p class="mb-0 small fw-semibold">No se encontraron viajes.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="position-relative rounded-4 overflow-hidden border shadow" style="height: 600px;">
+                <div id="map-detail" class="w-100 h-100"></div>
+                <div class="card position-absolute shadow-lg border-0 bg-white bg-opacity-95 p-3 d-none" 
+                     id="info-overlay" 
+                     style="top: 20px; right: 20px; z-index: 1000; width: 320px; border-radius: 16px;">
+                    <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-3">
+                        <div>
+                            <h3 class="h6 fw-bold mb-0 text-dark" id="overlay-viaje-titulo">Detalles del Viaje</h3>
+                            <span class="badge bg-secondary mt-1 small" id="overlay-vehiculo">Vehículo</span>
+                        </div>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="cerrarOverlay()"></button>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Conductor:</small>
+                        <strong class="text-dark small" id="overlay-conductor">-</strong>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Origen:</small>
+                            <span class="small fw-semibold text-dark text-truncate d-block" id="overlay-origen">-</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Destino:</small>
+                            <span class="small fw-semibold text-dark text-truncate d-block" id="overlay-destino">-</span>
+                        </div>
+                    </div>
+                    <div class="row g-2 pt-2 border-top">
+                        <div class="col-6 text-center border-end">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Distancia</small>
+                            <strong class="text-dark h5 mb-0" id="overlay-distancia">-</strong> <small class="text-muted" style="font-size: 0.8rem;">Km</small>
+                        </div>
+                        <div class="col-6 text-center">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Tiempo Est.</small>
+                            <strong class="text-dark h6 mb-0" id="overlay-tiempo">-</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+       
+        let map;          
+        let markerOrig;  
+        let markerDest;   
+        let layerRuta;   
+        
+        // Serializamos los viajes traídos del backend C# a un array JSON de Javascript
+        // Esto nos permite interactuar rápidamente con los viajes en el cliente sin recargar la página.
+        const listadoViajes = @Html.Raw(Json.Serialize(Model.Viajes));
+        let viajeSeleccionadoId = @(Model.ViajeSeleccionado != null ? Model.ViajeSeleccionado.Id : "null");
+        document.addEventListener("DOMContentLoaded", function () {
+            map = L.map('map-detail').setView([-35.675147, -71.542969], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // NOTA TÉCNICA: El contenedor del mapa está dentro de un div animado con CSS (.animate-fade-in).
+            // Si inicializamos el mapa mientras el div está invisible o cambiando de tamaño por la animación,
+            // Leaflet calcula dimensiones inválidas de 0px y el mapa se ve cortado con una barra gris.
+            // Para solucionarlo, usamos setTimeout de 100ms y forzamos a Leaflet a recalcular el tamaño (invalidateSize).
+            setTimeout(() => {
+                map.invalidateSize();
+                if (viajeSeleccionadoId) {
+                    cargarViajeEnMapa(viajeSeleccionadoId);
+                } else if (listadoViajes.length > 0) {
+                    ajustarMapaATodosLosViajes();
+                }
+            }, 100);
+        });
+        function ajustarMapaATodosLosViajes() {
+            const coords = [];
+            listadoViajes.forEach(v => {
+                if (v.latitudOrigen && v.longitudOrigen) {
+                    coords.push([v.latitudOrigen, v.longitudOrigen]);
+                }
+                if (v.latitudDestino && v.longitudDestino) {
+                    coords.push([v.latitudDestino, v.longitudDestino]);
+                }
+            });
+            // Si hay coordenadas, ajustar el zoom para encuadrarlas todas en pantalla con un margen
+            if (coords.length > 0) {
+                const bounds = L.latLngBounds(coords);
+                map.fitBounds(bounds, { padding: [40, 40] });
+            }
+        }
+
+        // Controlador de evento al hacer clic en una tarjeta de viaje lateral
+        function seleccionarViajeDesdeTarjeta(id) {
+            viajeSeleccionadoId = id;
+            cargarViajeEnMapa(id);
+        }
+
+        // Carga los marcadores, información flotante y traza la ruta real de carretera para un viaje específico
+        async function cargarViajeEnMapa(id) {
+            // Buscar los datos del viaje en nuestro listado local en memoria
+            const viaje = listadoViajes.find(v => v.id === id);
+            if (!viaje) return;
+
+            // Forzar recálculo del tamaño del mapa por si el contenedor tuvo alguna variación visual
+            map.invalidateSize();
+
+            // Estilizar visualmente la tarjeta seleccionada en el menú lateral usando clases nativas de Bootstrap
+            document.querySelectorAll("[id^='viaje-card-']").forEach(c => {
+                // Quitar clases de selección contextuales de Bootstrap
+                c.classList.remove("bg-light", "border-primary", "border-3");
+            });
+            const card = document.getElementById(`viaje-card-${id}`);
+            if (card) {
+                // Añadir borde grueso primario y fondo gris claro de Bootstrap para indicar activo
+                card.classList.add("bg-light", "border-primary", "border-3");
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Eliminar del mapa los elementos del viaje anterior
+            if (markerOrig) map.removeLayer(markerOrig);
+            if (markerDest) map.removeLayer(markerDest);
+            if (layerRuta) map.removeLayer(layerRuta);
+
+            // Obtener coordenadas de origen y destino parseadas a decimal flotante
+            const latOrig = parseFloat(viaje.latitudOrigen);
+            const lngOrig = parseFloat(viaje.longitudOrigen);
+            const latDest = parseFloat(viaje.latitudDestino);
+            const lngDest = parseFloat(viaje.longitudDestino);
+
+            // Validar que las coordenadas existan y sean numéricas
+            if (isNaN(latOrig) || isNaN(lngOrig) || isNaN(latDest) || isNaN(lngDest)) {
+                alert(`El viaje #${id} no tiene coordenadas guardadas. Por favor, edita el viaje y calcula su ruta primero.`);
+                cerrarOverlay();
+                return;
+            }
+
+            // VALIDACIÓN CRÍTICA: Control de límites terrestres.
+            // Si latitud > 90 o longitud > 180, significa que se guardaron datos gigantes corruptos por el problema regional de comas/puntos en C#.
+            // En ese caso, detenemos la carga del mapa para evitar que colapse y le enseñamos al usuario cómo solucionarlo.
+            if (Math.abs(latOrig) > 90 || Math.abs(lngOrig) > 180 || Math.abs(latDest) > 90 || Math.abs(lngDest) > 180) {
+                alert(`El viaje #${id} contiene coordenadas guardadas fuera de rango. Esto ocurre porque el viaje se guardó con problemas de punto decimal en el servidor.\n\nPara solucionarlo de inmediato:\n1. Ve a la pantalla de Viajes.\n2. Edita este viaje (#${id}).\n3. Presiona "Calcular Ruta" (el mapa del formulario cargará y actualizará las coordenadas con punto decimal).\n4. Presiona "Guardar cambios".\n\nEl sistema corregirá automáticamente el viaje de forma permanente.`);
+                cerrarOverlay();
+                return;
+            }
+
+            // Dibujar marcadores de Origen y Destino con ventanas de información flotantes (Popups)
+            markerOrig = L.marker([latOrig, lngOrig]).addTo(map).bindPopup(`<strong>Origen:</strong> ${viaje.origen}`);
+            markerDest = L.marker([latDest, lngDest]).addTo(map).bindPopup(`<strong>Destino:</strong> ${viaje.destino}`);
+
+            // Llenar el panel informativo flotante (Overlay) con los datos en tiempo real del viaje
+            document.getElementById("overlay-viaje-titulo").innerText = `Viaje #${viaje.id}`;
+            document.getElementById("overlay-vehiculo").innerText = viaje.vehiculo;
+            document.getElementById("overlay-conductor").innerText = viaje.conductor;
+            document.getElementById("overlay-origen").innerText = viaje.origen;
+            document.getElementById("overlay-destino").innerText = viaje.destino;
+            document.getElementById("overlay-distancia").innerText = viaje.distancia ? parseFloat(viaje.distancia).toFixed(1) : "-";
+            document.getElementById("overlay-tiempo").innerText = formatearTiempoSegundos(viaje.tiempoEstimado);
+
+            // Hacer visible la tarjeta flotante de detalles removiendo la clase d-none de Bootstrap
+            document.getElementById("info-overlay").classList.remove("d-none");
+
+            // Trazar el camino de carretera utilizando el enrutamiento gratuito de OSRM
+            try {
+                const coordenadas = `${lngOrig},${latOrig};${lngDest},${latDest}`;
+                const url = `https://router.project-osrm.org/route/v1/driving/${coordenadas}?overview=full&geometries=geojson`;
+                
+                const respuesta = await fetch(url);
+                if (respuesta.ok) {
+                    const datos = await respuesta.json();
+                    if (datos.code === "Ok" && datos.routes?.length) {
+                        const geom = datos.routes[0].geometry;
+                        // Dibujar la línea morada (#8e44ad) premium de la carretera sobre el mapa
+                        layerRuta = L.geoJSON(geom, {
+                            style: {
+                                color: '#8e44ad',
+                                weight: 5,
+                                opacity: 0.8
+                            }
+                        }).addTo(map);
+                    }
+                }
+            } catch (e) {
+                console.error("Error al trazar ruta mediante OSRM:", e);
+            }
+
+            // Ajustar el encuadre del mapa para mostrar holgadamente el punto de origen y de destino
+            const bounds = L.latLngBounds([[latOrig, lngOrig], [latDest, lngDest]]);
+            map.fitBounds(bounds, { padding: [60, 60] });
+        }
+
+        // Formatea una cantidad de segundos a un string amigable para humanos (ej. "2 h 15 min" o "45 min")
+        function formatearTiempoSegundos(segundos) {
+            if (!segundos) return "-";
+            const minutosTotales = Math.round(segundos / 60);
+            const horas = Math.floor(minutosTotales / 60);
+            const minutos = minutosTotales % 60;
+            if (horas === 0) {
+                return `${minutos} min`;
+            }
+            if (minutos === 0) {
+                return `${horas} h`;
+            }
+            return `${horas} h ${minutos} min`;
+        }
+
+        // Cierra la tarjeta flotante, limpia los marcadores del mapa y restablece la vista general
+        function cerrarOverlay() {
+            // Ocultar tarjeta flotante usando clase d-none de Bootstrap
+            document.getElementById("info-overlay").classList.add("d-none");
+            if (markerOrig) map.removeLayer(markerOrig);
+            if (markerDest) map.removeLayer(markerDest);
+            if (layerRuta) map.removeLayer(layerRuta);
+            document.querySelectorAll("[id^='viaje-card-']").forEach(c => {
+                c.classList.remove("bg-light", "border-primary", "border-3");
+            });
+            ajustarMapaATodosLosViajes();
+        }
+    </script>
+    <script src="~/js/chat-assistant.js" asp-append-version="true"></script>
+}
