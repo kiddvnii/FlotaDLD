@@ -5,12 +5,9 @@
 }
 
 @section Styles {
-    <!-- Importar la biblioteca de estilos de Leaflet para renderizar el mapa correctamente -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <!-- Hoja de estilos del Asistente de Chat -->
     <link rel="stylesheet" href="~/css/chat-assistant.css" asp-append-version="true" />
 }
-
 <div class="animate-fade-in">
     <div class="card p-4 mb-4 border-0 border-start border-5 shadow-sm" style="border-left-color: #8e44ad !important;">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -48,8 +45,6 @@
             </div>
         </form>
     </div>
-
-    <!-- Contenido principal: Panel lateral de viajes y el mapa -->
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card p-4 border-0 shadow-sm h-100">
@@ -64,17 +59,13 @@
                             <span>Últimos Viajes</span>
                         }
                     </h2>
-                    <!-- Badge circular de Bootstrap para indicar cantidad -->
                     <span class="badge bg-secondary rounded-pill">@Model.Viajes.Count</span>
                 </div>
-
-                <!-- Contenedor scroll de viajes estilizado puramente con clases de Bootstrap (pe-1 y estilos inline de scroll) -->
                 <div class="pe-1" style="max-height: 520px; overflow-y: auto;">
                     @if (Model.Viajes.Any())
                     {
                         foreach (var item in Model.Viajes)
                         {
-                            // Determinar la clase del badge de Bootstrap según el estado del viaje
                             var bgBadge = item.Estado?.ToLower() switch
                             {
                                 "pendiente" => "bg-warning text-dark",
@@ -83,8 +74,6 @@
                                 "cancelado" => "bg-danger text-white",
                                 _ => "bg-secondary text-white"
                             };
-
-                            <!-- Tarjeta de viaje individual usando clases de Bootstrap card -->
                             <div class="card mb-3 p-3 border shadow-sm list-group-item-action" 
                                  style="cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" 
                                  id="viaje-card-@item.Id" 
@@ -117,7 +106,6 @@
                     }
                     else
                     {
-                        <!-- Estado vacío con diseño Bootstrap -->
                         <div class="text-center py-5 text-muted border rounded-3 bg-light">
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-map mb-2 text-secondary" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.502.502 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103zM10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8v12.98zm-6-.8V.93l-4 .8v12.98l4-.8z"/>
@@ -170,7 +158,6 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
@@ -234,10 +221,7 @@
 
             // Forzar recálculo del tamaño del mapa por si el contenedor tuvo alguna variación visual
             map.invalidateSize();
-
-            // Estilizar visualmente la tarjeta seleccionada en el menú lateral usando clases nativas de Bootstrap
             document.querySelectorAll("[id^='viaje-card-']").forEach(c => {
-                // Quitar clases de selección contextuales de Bootstrap
                 c.classList.remove("bg-light", "border-primary", "border-3");
             });
             const card = document.getElementById(`viaje-card-${id}`);
@@ -287,7 +271,6 @@
             document.getElementById("overlay-distancia").innerText = viaje.distancia ? parseFloat(viaje.distancia).toFixed(1) : "-";
             document.getElementById("overlay-tiempo").innerText = formatearTiempoSegundos(viaje.tiempoEstimado);
 
-            // Hacer visible la tarjeta flotante de detalles removiendo la clase d-none de Bootstrap
             document.getElementById("info-overlay").classList.remove("d-none");
 
             // Trazar el camino de carretera utilizando el enrutamiento gratuito de OSRM
@@ -333,10 +316,8 @@
             }
             return `${horas} h ${minutos} min`;
         }
-
         // Cierra la tarjeta flotante, limpia los marcadores del mapa y restablece la vista general
         function cerrarOverlay() {
-            // Ocultar tarjeta flotante usando clase d-none de Bootstrap
             document.getElementById("info-overlay").classList.add("d-none");
             if (markerOrig) map.removeLayer(markerOrig);
             if (markerDest) map.removeLayer(markerDest);

@@ -94,17 +94,19 @@ namespace FlotaLuchitoWeb.Services
         /// <returns>Una respuesta al azar de la categoría que corresponda.</returns>
         public string GetResponse(string userMessage)
         {
-            // Si el mensaje está vacío o es puro espacio, le tiramos un saludo por defecto pa no ser rotos.
+            // Si el mensaje está vacío o es puro espacio, le tiramos un saludo por defecto pa' no ser rotos y ordinarios.
             if (string.IsNullOrWhiteSpace(userMessage))
             {
                 return GetRandomResponse("saludo");
             }
 
-            // Pasamos todo a minúsculas pa que no haya atados con las mayúsculas.
+            // Pasamos todo a minúsculas y le quitamos los espacios de los lados pa' que no haya atados con las mayúsculas o espacios locos.
             string lowerMessage = userMessage.ToLower().Trim();
-            // Analizamos el mensaje pa ver en qué categoría cae.
+            
+            // Analizamos el mensaje pa' ver en qué categoría cae el drama del usuario.
             string category = DeterminateCategory(lowerMessage);
-            // Sacamos una respuesta buena de esa categoría.
+            
+            // Sacamos una respuesta buena y chora de esa categoría.
             return GetRandomResponse(category);
         }
 
@@ -115,7 +117,7 @@ namespace FlotaLuchitoWeb.Services
         /// <returns>La categoría detectada.</returns>
         private string DeterminateCategory(string message)
         {
-            // Diccionario con las palabras clave pa cachar la intención de la consulta.
+            // Diccionario con las palabras clave pa' cachar la intención de la consulta.
             var keywords = new Dictionary<string, string[]>
             {
                 { "conductor", new[] { "conductor", "conductores", "chofer", "choferes", "driver" } },
@@ -125,7 +127,7 @@ namespace FlotaLuchitoWeb.Services
                 { "menu", new[] { "menu", "menú", "inicio", "principal", "opciones" } },
             };
 
-            // Recorre el diccionario pa ver si el mensaje contiene alguna de las palabras clave.
+            // Recorremos el diccionario. Si pillamos alguna palabra que haga "match", ¡pum!, devolvemos la categoría al tiro.
             foreach (var kvp in keywords)
             {
                 if (kvp.Value.Any(word => message.Contains(word)))
@@ -134,13 +136,13 @@ namespace FlotaLuchitoWeb.Services
                 }
             }
 
-            // Si es un saludo rápido, lo pillamos altiro aquí.
+            // Si es un saludo rápido (tipo "hola", "buenos días", "hi"), lo atajamos al vuelo por acá.
             if (message.Contains("hola") || message.Contains("hí") || message.Contains("buenos"))
             {
                 return "saludo";
             }
 
-            // Si no le apuntó a nada de arriba, cae al saco del default.
+            // Si no le apuntó a nada de arriba y el bot quedó marcando ocupado, cae al saco del 'default'.
             return "default";
         }
 
@@ -151,20 +153,21 @@ namespace FlotaLuchitoWeb.Services
         /// <returns>Una respuesta al azar.</returns>
         private string GetRandomResponse(string category)
         {
-            // Si la categoría que nos pasaron no existe en el mapa, nos vamos a la segura con 'default'.
+            // Si la categoría que nos pasaron no existe en el mapa o nos mandaron una cuestión rara, nos vamos a la segura con 'default'.
             if (!_responses.ContainsKey(category))
             {
                 category = "default";
             }
 
             var responses = _responses[category];
-            // Genera un número al azar pa sacar una respuesta distinta cada vez.
+            
+            // Genera un número al azar pa' sacar una respuesta distinta cada vez y que parezca que el bot piensa la respuesta.
             int randomIndex = new Random().Next(responses.Count);
             return responses[randomIndex];
         }
 
         /// <summary>
-        /// El torpedo de opciones disponibles por si el usuario anda más perdido.
+        /// El torpedo de opciones disponibles por si el usuario anda más perdido que el teniente Bello.
         /// </summary>
         /// <returns>Una string con las sugerencias de la casa.</returns>
         public string GetSuggestions()

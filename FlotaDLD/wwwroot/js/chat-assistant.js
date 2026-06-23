@@ -9,12 +9,12 @@
 
 class ChatAssistant {
     constructor() {
-        // Indica si el panel de chat está abierto o cerrado visualmente.
+        // Indica si el panel de chat está abierto o cerrado en la pantalla.
         this.isOpen = false;
-        // Historial local de mensajes enviados y recibidos en la sesión.
+        // El historial local para ir guardando la cháchara de la sesión.
         this.messages = [];
         
-        // Inicializa la interfaz y eventos del chat.
+        // Inicializa la interfaz y deja listos los escuchadores de eventos.
         this.init();
     }
 
@@ -28,12 +28,12 @@ class ChatAssistant {
     }
 
     /**
-     * Crea dinámicamente los elementos HTML del chat en el DOM para evitar saturar el marcado principal.
+     * Crea dinámicamente los elementos HTML del chat en el DOM para evitar saturar el HTML principal.
      */
     createChatWidget() {
         const fragment = document.createDocumentFragment();
 
-        // 1. Botón flotante para abrir el chat.
+        // 1. Botón flotante para abrir el chat (el circulito con el emoji).
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'chat-toggle-btn';
         toggleBtn.id = 'chatToggleBtn';
@@ -41,7 +41,7 @@ class ChatAssistant {
         toggleBtn.title = 'Abrir asistente de chat';
         fragment.appendChild(toggleBtn);
 
-        // 2. Ventana de chat (oculta inicialmente).
+        // 2. Ventana de chat (oculta inicialmente, se activa al hacer clic en el botón de arriba).
         const widget = document.createElement('div');
         widget.className = 'chat-assistant-widget';
         widget.id = 'chatWidget';
@@ -62,7 +62,7 @@ class ChatAssistant {
         `;
         fragment.appendChild(widget);
 
-        // Añade todo el fragmento al cuerpo del documento.
+        // Chanta todo el fragmento construido al final de la página.
         document.body.appendChild(fragment);
     }
 
@@ -75,23 +75,23 @@ class ChatAssistant {
         const sendBtn = document.getElementById('chatSendBtn');
         const input = document.getElementById('chatInput');
 
-        // Alterna el estado del chat al pulsar el botón de burbuja flotante.
+        // Abre o cierra el chat al hacer clic en el círculo flotante.
         toggleBtn.addEventListener('click', () => this.toggleChat());
         
-        // Cierra el chat al presionar el botón "X" en la cabecera.
+        // Cierra el chat al presionar la "X" de la cabecera.
         closeBtn.addEventListener('click', () => this.closeChat());
         
-        // Envía el mensaje actual al hacer clic en el botón de enviar.
+        // Envía la pregunta al hacer clic en la flechita.
         sendBtn.addEventListener('click', () => this.sendMessage());
         
-        // Permite enviar el mensaje al presionar la tecla 'Enter' en el campo de texto.
+        // Si el usuario presiona la tecla 'Enter', manda la pregunta altiro sin tener que hacer clic.
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
     }
 
     /**
-     * Cambia el estado de visibilidad del chat.
+     * Cambia el estado de visibilidad del chat (abierto/cerrado).
      */
     toggleChat() {
         if (this.isOpen) {
@@ -102,7 +102,7 @@ class ChatAssistant {
     }
 
     /**
-     * Muestra la ventana de chat, oculta el botón flotante y coloca el foco en el campo de texto.
+     * Muestra la ventana de chat, oculta el botón flotante y le hace foco al input para escribir de inmediato.
      */
     openChat() {
         const widget = document.getElementById('chatWidget');
@@ -114,7 +114,7 @@ class ChatAssistant {
     }
 
     /**
-     * Oculta la ventana de chat y vuelve a mostrar el botón flotante.
+     * Oculta la ventana de chat y vuelve a mostrar la burbuja flotante.
      */
     closeChat() {
         const widget = document.getElementById('chatWidget');
@@ -125,8 +125,8 @@ class ChatAssistant {
     }
 
     /**
-     * Muestra el saludo de bienvenida automático con un pequeño retraso de 500ms
-     * para emular un comportamiento más natural de la IA al cargar la página.
+     * Muestra el saludo inicial con un retraso de 500ms pa' que parezca que el bot está pensando 
+     * y no se vea tan robótico ni soso al cargar la página.
      */
     showInitialGreeting() {
         setTimeout(() => {
@@ -138,34 +138,34 @@ class ChatAssistant {
     }
 
     /**
-     * Lee el valor de entrada, añade el mensaje del usuario en pantalla,
-     * activa el indicador de escritura ("escribiendo...") y solicita la respuesta del servidor.
+     * Rescata el texto escrito, lo muestra en la burbuja del usuario, 
+     * activa el spinner de carga ("escribiendo...") y le pregunta al servidor por fetch.
      */
     sendMessage() {
         const input = document.getElementById('chatInput');
         const text = input.value.trim();
 
-        // Evita el envío de mensajes vacíos.
+        // Si el compadre no escribió nada, no hacemos nada pa' no mandar datos vacíos.
         if (!text) return;
 
-        // Añade el mensaje al historial visual.
+        // Añade el mensaje del usuario en el chat.
         this.addMessage({
             text: text,
             type: 'user'
         });
 
-        // Limpia el input del chat.
+        // Limpia el campo de texto pa' escribir la siguiente duda.
         input.value = '';
         
-        // Muestra la animación de carga/espera.
+        // Muestra los puntitos suspensivos de que el asistente está procesando.
         this.showTypingIndicator();
         
-        // Llama a la API para obtener respuesta.
+        // Llama al servidor enviándole la consulta.
         this.fetchResponse(text);
     }
 
     /**
-     * Construye y añade una burbuja de mensaje en el contenedor de chat.
+     * Dibuja y añade una burbuja de mensaje en la pantalla del chat.
      * @param {Object} message - Objeto del mensaje con formato { text: string, type: 'user'|'assistant' }
      */
     addMessage(message) {
@@ -173,20 +173,19 @@ class ChatAssistant {
 
         const messagesContainer = document.getElementById('chatMessages');
         
-        // Contenedor principal del mensaje.
+        // Contenedor del mensaje.
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${message.type}`;
 
-        // Burbuja de diálogo.
+        // Burbuja de texto.
         const bubble = document.createElement('div');
         bubble.className = 'chat-bubble';
         
-        // Texto del mensaje.
         const textSpan = document.createElement('span');
         textSpan.textContent = message.text;
         bubble.appendChild(textSpan);
 
-        // Si el mensaje es del asistente, agrega un botón de altavoz "🔊" para leerlo en voz alta.
+        // Si el mensaje es de la IA, le ponemos un botón de parlante "🔊" para leerlo en voz alta.
         if (message.type === 'assistant') {
             const speakBtn = document.createElement('button');
             speakBtn.className = 'speak-btn';
@@ -200,9 +199,9 @@ class ChatAssistant {
             speakBtn.style.display = 'inline-block';
             speakBtn.style.verticalAlign = 'middle';
             
-            // Evento para sintetizar el texto de la respuesta al hacer clic en el altavoz.
+            // Evento para reproducir el Text-to-Speech al hacer clic.
             speakBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Evita burbujeo no deseado de eventos.
+                e.stopPropagation(); // Evitamos que el evento flote a otros elementos.
                 this.speak(message.text);
             });
             bubble.appendChild(speakBtn);
@@ -211,12 +210,12 @@ class ChatAssistant {
         messageDiv.appendChild(bubble);
         messagesContainer.appendChild(messageDiv);
 
-        // Hace scroll hacia abajo para asegurar que el nuevo mensaje quede visible.
+        // Scroll automático hacia abajo pa' mantener siempre el último mensaje a la vista del usuario.
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
     /**
-     * Muestra una animación de tres puntos suspensivos simulando que el asistente está escribiendo.
+     * Muestra la animación de carga con tres puntitos suspensivos.
      */
     showTypingIndicator() {
         const messagesContainer = document.getElementById('chatMessages');
@@ -237,7 +236,7 @@ class ChatAssistant {
     }
 
     /**
-     * Remueve el indicador visual de escritura de la pantalla.
+     * Saca de pantalla la animación de carga.
      */
     removeTypingIndicator() {
         const typingDiv = document.getElementById('typingIndicator');
@@ -245,12 +244,12 @@ class ChatAssistant {
     }
 
     /**
-     * Envía una solicitud AJAX al backend (ASP.NET Razor Page) solicitando la respuesta de la IA.
-     * @param {string} userMessage - El mensaje escrito por el usuario.
+     * Envía una solicitud AJAX tipo POST al backend en C# para obtener la respuesta.
+     * @param {string} userMessage - El mensaje ingresado por el usuario.
      */
     async fetchResponse(userMessage) {
         try {
-            // Obtiene el token CSRF para proteger la solicitud POST contra ataques CSRF.
+            // Obtiene el token CSRF (antiforgery) obligatorio para que ASP.NET no nos bloquee la petición POST.
             const token = this.getAntiforgeryToken();
 
             if (!token) {
@@ -263,7 +262,7 @@ class ChatAssistant {
                 return;
             }
 
-            // Realiza la petición POST al backend (Handler "Chat" en la página Menu).
+            // Petición POST al endpoint del backend (/Menu?handler=Chat).
             const response = await fetch('/Menu?handler=Chat', {
                 method: 'POST',
                 headers: {
@@ -275,12 +274,11 @@ class ChatAssistant {
 
             const data = await response.json();
 
-            // Lanza error si la respuesta HTTP no fue exitosa.
             if (!response.ok) {
                 throw new Error(data.error || 'Error en la solicitud');
             }
 
-            // Remueve el indicador de carga e imprime la respuesta de la IA.
+            // Quitamos el cargador y pintamos la respuesta que nos mandó el servidor.
             this.removeTypingIndicator();
             this.addMessage({
                 text: data.message,
@@ -297,7 +295,7 @@ class ChatAssistant {
     }
 
     /**
-     * Extrae el token de verificación de solicitudes de ASP.NET Core desde el DOM.
+     * Recupera el token CSRF del DOM para validaciones de seguridad.
      * @returns {string} Token de seguridad.
      */
     getAntiforgeryToken() {
@@ -310,27 +308,27 @@ class ChatAssistant {
     }
 
     /**
-     * Solicita la síntesis de voz al servidor backend.
-     * Envía el texto y reproduce el stream de audio retornado por el servidor.
-     * @param {string} text - El texto a leer en voz alta.
+     * Solicita la síntesis de voz (Text-to-Speech) al servidor.
+     * Quita los emojis, descarga el archivo binario del audio y lo reproduce al tiro.
+     * @param {string} text - El texto que se va a leer en voz alta.
      */
     async speak(text) {
         try {
-            // Remueve emojis del texto para que no interfieran con la pronunciación del backend.
+            // Limpiamos los emojis del texto para que el sintetizador no ande balbuceando cosas raras.
             let cleanText = text.replace(/[🚗🚗🚙🚙✈️✈️🚗🚙✈️❓📋👋🤔😊😔📢🛎️🔔📣🔔]/g, '');
             
-            // Realiza una petición GET al Handler "Speak" de la página Menu enviando el texto.
+            // Petición GET al handler "Speak" pasando el texto codificado por URL.
             const response = await fetch(`/Menu?handler=Speak&text=${encodeURIComponent(cleanText)}`);
             if (!response.ok) {
                 throw new Error('Error al generar voz');
             }
-            // Obtiene la respuesta en formato binario (Blob, típicamente audio/wav).
+            // Obtiene la respuesta de audio en formato binario.
             const blob = await response.blob();
-            // Crea una URL local temporal para reproducir el archivo de audio.
+            // Crea una URL temporal en memoria para poder reproducirla.
             const audioUrl = URL.createObjectURL(blob);
             const audio = new Audio(audioUrl);
             
-            // Reproduce el audio.
+            // ¡Póngale play!
             audio.play();
         } catch (error) {
             console.error('Error en Text-to-Speech:', error);
@@ -339,7 +337,7 @@ class ChatAssistant {
     }
 }
 
-// Inicializa el chat una vez que el DOM del sitio web esté completamente cargado.
+// Inicializa el ayudante apenas el DOM del sitio web esté completamente cargado.
 document.addEventListener('DOMContentLoaded', () => {
     new ChatAssistant();
 });

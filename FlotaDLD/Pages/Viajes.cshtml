@@ -185,7 +185,9 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // API Nominatim (Geocoding): Convierte una dirección de texto en coordenadas geográficas (latitud y longitud).
+        // === BUSCAR COORDENADAS CON NOMINATIM ===
+        // Esta función traduce una dirección de texto a coordenadas (Lat y Lng).
+        // Le chanta ", Chile" al final pa' que la API no ande dando jugo buscando calles en China.
         async function buscarCoordenadas(lugar) {
             const consulta = encodeURIComponent(`${lugar}, Chile`);
             const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=cl&q=${consulta}`;
@@ -208,6 +210,8 @@
             };
         }
         
+        // === FORMATEAR TIEMPO EN MODO CRISTIANO ===
+        // Convierte los segundos brutos que tira la API a algo que entienda un ser humano (ej: "2 horas y 15 minutos").
         function mostrarTiempo(segundos) {
             const minutosTotales = Math.round(segundos / 60);
             const horas = Math.floor(minutosTotales / 60);
@@ -221,6 +225,8 @@
             return `${horas} hora${horas > 1 ? "s" : ""} y ${minutos} minutos`;
         }
 
+        // === CALCULAR LA RUTA POR CARRETERA ===
+        // Aquí ocurre la magia: busca las coordenadas de origen y destino, y llama a OSRM para saber la distancia y duración.
         async function calcularRuta() {
             const origenInput = document.getElementById("Viaje_Origen");
             const destinoInput = document.getElementById("Viaje_Destino");
@@ -246,8 +252,13 @@
             tiempoInput.value = "Buscando ruta...";
             
             try {
+                // 1. Buscamos el origen
                 const coordenadasOrigen = await buscarCoordenadas(origen);
+                
+                // 2. Aguanta un cachito (1.1 segundos) pa' que la API gratuita no nos eche la foca por hacer llamadas tan seguidas
                 await new Promise(resolve => setTimeout(resolve, 1100));
+                
+                // 3. Buscamos el destino
                 const coordenadasDestino = await buscarCoordenadas(destino);
 
                 const latOrig = parseFloat(coordenadasOrigen.latitud);
@@ -255,6 +266,7 @@
                 const latDest = parseFloat(coordenadasDestino.latitud);
                 const lngDest = parseFloat(coordenadasDestino.longitud);
 
+                // 4. Guardamos las coordenadas en los inputs ocultos pa' mandarlas a la base de datos
                 latOrigInput.value = latOrig;
                 lngOrigInput.value = lngOrig;
                 latDestInput.value = latDest;
@@ -264,6 +276,8 @@
                 const urlRuta =
                     `https://router.project-osrm.org/route/v1/driving/${coordenadas}` +
                     `?overview=full&geometries=geojson&steps=false&alternatives=false`;
+                
+                // 5. Le pedimos la ruta por carretera al ruteador OSRM
                 const respuestaRuta = await fetch(urlRuta);
                 if (!respuestaRuta.ok) {
                     throw new Error("No se pudo calcular la ruta.");
@@ -273,14 +287,16 @@
                     throw new Error("No se encontró una ruta por carretera.");
                 }
                 const ruta = datosRuta.routes[0];
-                const distanciaKm = ruta.distance / 1000;
-                const tiempoSegundos = ruta.duration;
+                const distanciaKm = ruta.distance / 1000; // Pasamos los metros a kilómetros
+                const tiempoSegundos = ruta.duration;      // Duración en segundos
 
+                // 6. Rellenamos los campos de la pantalla con la info pulenta
                 distanciaInput.value = distanciaKm.toFixed(1);
                 tiempoInput.value = mostrarTiempo(tiempoSegundos);
                 tiempoInput.dataset.segundos = tiempoSegundos;
                 tiempoSegundosInput.value = Math.round(tiempoSegundos);
 
+                // 7. Gatillamos al tiro el cálculo de la fecha de llegada
                 actualizarFechaLlegada();
             }
             catch (error) {
@@ -294,6 +310,8 @@
             }
         }
 
+        // === CALCULO ESTIMADO DE FECHA DE LLEGADA ===
+        // Agarra la fecha de salida, le suma los segundos del viaje y calcula cuándo debería llegar el chofer.
         function actualizarFechaLlegada() {
             const salidaInput = document.getElementById("Viaje_FechaSalida");
             const llegadaInput = document.getElementById("Viaje_FechaLlegada");
@@ -309,6 +327,7 @@
                 return;
             }
             
+            // Sumamos los segundos calculados (multiplicados por 1000 porque Date trabaja en milisegundos)
             const fechaLlegada = new Date(fechaSalida.getTime() + segundos * 1000);
             const year = fechaLlegada.getFullYear();
             const month = String(fechaLlegada.getMonth() + 1).padStart(2, '0');
@@ -316,16 +335,19 @@
             const hours = String(fechaLlegada.getHours()).padStart(2, '0');
             const minutes = String(fechaLlegada.getMinutes()).padStart(2, '0');
             
+            // Inyectamos el resultado con el formato que le gusta al input datetime-local
             llegadaInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
         }
 
+        // === AL CARGAR LA PÁGINA ===
         document.addEventListener('DOMContentLoaded', function () {
             const salidaInput = document.getElementById("Viaje_FechaSalida");
             if (salidaInput) {
+                // Si el usuario cambia la fecha de salida a mano, recalculamos la llegada al toque
                 salidaInput.addEventListener('change', actualizarFechaLlegada);
             }
 
-            // Cargar tiempo si existen datos guardados en modo edición
+            // Si estamos editando un viaje antiguo, cargamos los datos ya guardados pa' que no queden vacíos
             const tiempoEst = parseInt(document.getElementById("tiempoEstimadoSegundos").value);
             if (!isNaN(tiempoEst)) {
                 const tiempoInput = document.getElementById("tiempoEstimado");

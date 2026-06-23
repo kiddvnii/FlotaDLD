@@ -5,7 +5,7 @@ using FlotaLuchitoWeb.Clases;
 namespace FlotaLuchitoWeb.Data
 {
     // Esta wea de clase hace el nexo de pana entre las vistas y la BD local.
-    // Pa no andar escribiendo SQL directo en los controladores, terrible perkin esa wea.
+    // Pa no andar escribiendo SQL directo en los controladores
     public class DataBaseHelper
     {
         private readonly string _connectionString;
